@@ -1,0 +1,75 @@
+﻿@page "/Register"
+@using LoginDC6.Shared.Helpers.DTOs
+
+<PageTitle>Register</PageTitle>
+
+<EditForm Model="userInfoReg" OnValidSubmit="RegisterUser">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="text-center">Register</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username(Email)</label>
+                            <InputText type="text" class="form-control" id="username" placeholder="Enter your username" @bind-Value="userInfoReg.Email" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="reusername" class="form-label">Retype Username(Email)</label>
+                            <InputText type="text" class="form-control" id="reusername" placeholder="Enter your username" @bind-Value="userInfoReg.ConfirmEmail" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="mobilenumber" class="form-label">Mobile Number</label>
+                            <InputText type="text" class="form-control" id="mobilenumber" placeholder="Enter your username" @bind-Value="userInfoReg.Email" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <InputPassword type="text" class="form-control" id="password" placeholder="Enter your username" @bind-Value="userInfoReg.StrPassword" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="retypepassword" class="form-label">Retype Password</label>
+                            <InputPassword type="text" class="form-control" id="retypepassword" placeholder="Enter your username" @bind-Value="userInfoReg.ConfirmPassword" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="firstname" class="form-label">First Name</label>
+                            <InputText type="text" class="form-control" id="firstname" placeholder="Enter your username" @bind-Value="userInfoReg.FirstName" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastname" class="form-label">Last Name</label>
+                            <InputText type="text" class="form-control" id="firstname" placeholder="Enter your username" @bind-Value="userInfoReg.LastName" />
+                        </div>
+                        @if (isPreaner == false)
+                        {
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Register</button>
+                            </div>
+                        }
+                        else
+                        {//Wait for register response
+                            <div class="d-grid">
+                                <button class="btn btn-primary">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    Wait...
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+
+    private UserInfoRegister userInfoReg = new UserInfoRegister();
+
+    Boolean isPreaner = false;
+    private async Task RegisterUser()
+    {
+     
+        
+    }
+}

@@ -1,0 +1,31 @@
+﻿@page "/"
+@page "/index"
+@using Microsoft.AspNetCore.Components.Authorization;
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime _IJSRuntime
+
+<PageTitle>Index</PageTitle>
+
+
+<CascadingAuthenticationState>
+    <AuthorizeView>
+        <Authorized>
+            <h4>Hi, @context.User.Identity.Name!</h4>
+            <p>Logged in successfully.</p>
+        </Authorized>
+        <Authorizing>
+            <h4>Logging In</h4>
+            <p>Logging in, please wait...</p>
+        </Authorizing>
+        <NotAuthorized>
+            <h4>Login Failed</h4>
+            <p>Please click the link above the page to log in...</p>
+        </NotAuthorized>
+    </AuthorizeView>
+
+
+</CascadingAuthenticationState>
+
+@*<span class="oi oi-account-login"></span>
+<span class="oi oi-account-logout"></span>*@

@@ -1,0 +1,228 @@
+﻿@page "/Login"
+
+@inject Client.Repositories.IAccountRepository AccountRepository
+@inject NavigationManager NavigationManager
+@inject Client.Auth.ILoginService loginService
+@inject IJSRuntime _IJSRuntime
+
+@if (!IsShowAccept)
+{
+    <EditForm Model="userInfoLogin" OnValidSubmit="LoginUser">
+        <div class="container">
+            <div class="row justify-content-center mt-5">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-center">Login</h3>
+                        </div>
+                        <div class="card-body">
+
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <InputText type="text" class="form-control" id="username" placeholder="Enter your username" @bind-Value="userInfoLogin.Email" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <InputPassword type="text" class="form-control" id="username" placeholder="Enter your username" @bind-Value="userInfoLogin.StrPassword" />
+                            </div>
+                            @if (isPreaner == false)
+                            {
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">Login</button>
+                                </div>
+                            }
+                            else
+                            {//Wait for login response
+                                <div class="d-grid">
+                                    <button class="btn btn-primary">
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        Wait...
+                                    </button>
+                                </div>
+                            }
+                            @if (BlnCanViewError)
+                            {//Error
+                                <p class="text-danger">Username or password is not correct . . .</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+}
+else
+{
+    <EditForm Model="userInfoLogin" OnValidSubmit="SubmitAccept">
+        <div class="container">
+            <div class="row justify-content-center mt-5">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-center">Enter second security code . . .</h3>
+                        </div>
+                        <div class="card-body">
+
+                            <div class="mb-3">
+                                <label for="StrSecurityCode" class="form-label">Second Code</label>
+                                <InputText type="text" class="form-control" id="StrSecurityCode" placeholder="Enter your username" @bind-Value="userInfoLogin.StrCode" />
+                            </div>
+
+                            @if (isProsses2)
+                            {
+                                <div class="d-grid">
+                                    <button class="btn btn-primary">
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        Logining . . .
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">Login . . .</button>
+                                </div>
+                                @if (aTimer.Enabled)
+                                {
+                                    <a class="btn btn--md  btn-outline-info disabled" >(Second @counter ) send again . . .</a>
+                                }
+                                else
+                                {
+                                    <a class="btn btn--md btn-info" @onclick="@(()=>LoginUser())" > send again . . .</a>
+                                }
+                            }
+                            @if (BlnCanViewError2)
+                            {//Error
+                                <p class="text-danger">Security code is not correct . . .</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    private LoginDC6.Shared.Helpers.DTOs.UserInfoLogin userInfo = new LoginDC6.Shared.Helpers.DTOs.UserInfoLogin();
+    private LoginDC6.Shared.Helpers.DTOs.UserInfoLogin userInfoLogin =
+        new LoginDC6.Shared.Helpers.DTOs.UserInfoLogin() { Email = "", StrPassword = "", CaptchaString = "45454" };
+
+    String MessageForModal = "";
+    String MessageError = "";
+    String MessageAlert = "";
+    Boolean BlnCanViewError , BlnCanViewError2 = false;
+    Boolean isPreaner = false;
+
+    Boolean IsShowAccept = false;
+    Boolean isProsses = false;
+    Boolean isProsses2 = false;
+    Boolean IsHiddenAlert = true;
+
+    private async Task SubmitAccept()
+    {
+        isProsses2 = true;
+        BlnCanViewError = false;
+        userInfo.StrCode = userInfoLogin.StrCode;
+        var userToken = await AccountRepository.LoginTwoStep(userInfo);
+        if (userToken.Responser.ResponsState == LoginDC6.Shared.Helpers.ResponserState.Successful && userToken.Token != null)
+        {
+            await loginService.Login(userToken.Token);
+
+            NavigationManager.NavigateTo("/index");
+            return;
+        }
+        else
+        {
+            MessageError = "مشخصات کاربری صحیح نمی باشند . . ." + userToken.Responser.StrMessage;
+            BlnCanViewError = true;
+            await InvokeAsync(StateHasChanged);
+        }
+        isProsses2 = false;
+    }
+
+    private async Task LoginUser()
+    {
+        isPreaner = true;
+        StateHasChanged();
+        BlnCanViewError = false;
+        //userInfo.ConfirmEmail = userInfoLogin.Email;
+        userInfo.Email = userInfoLogin.Email;
+        userInfo.StrPassword = userInfoLogin.StrPassword;
+        //userInfo.ConfirmPassword = userInfoLogin.StrPassword;
+        //userInfo.IsWoman = false;
+        //userInfo.FirstName = "---";
+        //userInfo.LastName = "---";
+        //userInfo.PhoneNumber = "091354554656546";
+        userInfo.CaptchaString = userInfoLogin.CaptchaString;
+        //userInfo.CanRememberMe = true;
+        userInfo.CaptchaString = "4465456";
+        //userInfo.FaxNumber = "45456564";
+        //userInfo.WorkAddress = userInfo.HomeAddress = "hsdkjfhdsf";
+        //userInfo.LandLinePhoneNumber = "56456546";
+        userInfo.StrCode = "string";
+
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var userToken = await AccountRepository.Login(userInfo);
+            if (userToken.Responser.ResponsState == LoginDC6.Shared.Helpers.ResponserState.Successful)
+            {
+                if (userToken.Token != null)
+                {
+                    await loginService.Login(userToken.Token);
+                    NavigationManager.NavigateTo("/index", true);
+                }
+            }
+            else if (userToken.Responser.ResponsState == LoginDC6.Shared.Helpers.ResponserState.TwoVerification)
+            {
+                Console.WriteLine(userToken.Responser.StrMessage);
+                await InvokeAsync(StateHasChanged);
+                IsShowAccept = true;
+                StartTimer();
+                await InvokeAsync(StateHasChanged);
+            }
+            else
+            {
+                MessageError = userToken.Responser.StrMessage;
+                BlnCanViewError = true;
+                await InvokeAsync(StateHasChanged);
+                isPreaner = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageError = "مشخصات کاربری صحیح نمی باشند . . ." + ex.Message;
+            BlnCanViewError = true;
+            await InvokeAsync(StateHasChanged);
+            isPreaner = false;
+            StateHasChanged();
+        }
+    }
+
+    private static System.Timers.Timer aTimer;
+    private int counter = 60;
+
+    public void StartTimer()
+    {
+        counter = 60;
+        aTimer = new System.Timers.Timer(1000);
+        aTimer.Elapsed += CountDownTimer;
+        aTimer.Enabled = true;
+    }
+
+    public void CountDownTimer(Object source, System.Timers.ElapsedEventArgs e)
+    {
+        if (counter > 0)
+        {
+            counter -= 1;
+        }
+        else
+        {
+            aTimer.Enabled = false;
+        }
+        InvokeAsync(StateHasChanged);
+    }
+}
